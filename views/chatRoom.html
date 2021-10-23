@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="/resources/js/vue.min.js"></script>
+    <script src="/root/main.js"></script>
+    <title>聊天室</title>
+</head>
+<body>
+<div id="diva">
+    登入成功,{{username}}<br>
+    <button @click="sendMessage('你好世界!')">发送</button>
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+
+
+    var socket = io.connect('http://localhost:8888');
+
+    //连接成功时触发
+    socket.on('connect', function () {
+        // console.log(`${new Date().toLocaleString()}]:[系统]用户${username}加入聊天室。`);
+    });
+    //初始化客户端，渲染用户名，在线列表等
+    socket.on('init',function (msg){
+        var vm=new Vue({
+            el:'#diva',
+            data:{
+                username:msg
+            }
+        });
+    });
+    //说话
+    function sendMessage(msg){
+        socket.emit('sendMessage',msg);
+    }
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
