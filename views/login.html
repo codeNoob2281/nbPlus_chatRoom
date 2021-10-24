@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/resources/css/bootstrap.min.css">
+    <script src="/resources/js/jquery-1.12.4.min.js"></script>
+   <script src="/resources/js/login.js"></script>
 
-    <title>欢迎使用nbPlus聊天室系统</title>
+    <title>登录</title>
 </head>
-<h1>nbPlus chatRoom</h1>
+
 <body style="text-align: center;">
-<form action="/login" method="post" style="width: 700px;display: inline-block;text-align: left">
+<h1>nbPlus chatRoom用户登录</h1>
+<form action="/login" method="post" style="width: 700px;display: inline-block;text-align: left" onsubmit="return formValidation()">
     <label for="username">账号:</label>
    <input type="text" name="username" id="username" class="form-control"><br>
     <label for="password">密码:</label>
     <input type="password" name="password" id="password" class="form-control"><br>
-
     <input type="submit" value="登录" class="btn btn-primary">
-    <input type="button" value="没有账户?点击注册" class="btn btn-default">
+    <a href="/register"> <input type="button" value="没有账户?点击注册" class="btn btn-default"></a>
 </form>
-
-
-
 </body>
 </html>
