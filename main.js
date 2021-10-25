@@ -10,12 +10,28 @@ const fs=require('fs');
 //在线客户端
 var clients={};
 var onlineNameList={};
+var onlineSize=0;
+//群聊消息队列
+var groupMessage=[
+    {
+        sender:'admin',
+        time:new Date().toLocaleString(),
+        content:"你好，世界"
+    },
+    {
+        sender:'user1',
+        time:new Date().toLocaleString(),
+        content:"世界,你好"
+    }
+];
 //当前用户名
 var nowUsername="";
 //登录门闸
 var isLogin=false;
 
 // -----------
+
+
 
 
 const urlencoded=bodyParser.urlencoded({extends:false});
@@ -112,6 +128,7 @@ io.on('connection',function (client){
         client.name = nowUsername;
         clients[client.name] = client;
         onlineNameList[client.name]=client.name;
+        onlineSize++;
         // 刷新所有客户机在线列表
         io.emit('aMemberOn',onlineNameList);
         console.log(`[${new Date().toLocaleString()}]:[服务器]用户${client.name}加入聊天室。`);
@@ -120,20 +137,29 @@ io.on('connection',function (client){
             console.log(`[${new Date().toLocaleString()}]:[服务器]用户${client.name}退出聊天室。`);
             delete clients[client.name];
             delete onlineNameList[client.name];
+            onlineSize--;
             //刷新所有客户机在线列表
             io.emit('aMemberOff',onlineNameList);
         });
         // 客户端初始化
         client.emit('init', {
-            username: client.name//客户机名
+            username: client.name,//客户机名
+            groupMessage:groupMessage,//同步群聊历史消息
+            onlineSize:onlineSize//在线人数
         });
 
         // 服务器接受消息
         client.on('sendMessage', function (msg) {
             console.log(`[${new Date().toLocaleString()}]:[${client.name}]${msg}`);
+            let newMsg={
+                sender:client.name,
+                time:new Date().toLocaleString(),
+                content:msg
+            }
+            groupMessage.push(newMsg);
+            //更新所有客户端群聊消息
+            io.emit('updateGroupMsg',groupMessage);
         });
-
-
 });
 
 

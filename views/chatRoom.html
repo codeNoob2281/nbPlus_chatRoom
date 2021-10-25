@@ -49,7 +49,7 @@
 
 <div id="chat-box">
     <div id="chat-box-navbar" style="color: white">
-        <p onclick="toggleOnlineList()" id="online_list_bar">在线人数({{onLineList.length}})<span class="glyphicon glyphicon-chevron-down" id="online_list_bar_span"></span></p>
+        <p onclick="toggleOnlineList()" id="online_list_bar">在线人数({{onlineSize}})<span class="glyphicon glyphicon-chevron-down" id="online_list_bar_span"></span></p>
         <ul id="online_list" >
             <li v-for="member in onLineList"><a href="#" >{{member}}</a></li>
         </ul>
@@ -60,35 +60,38 @@
             <span>测试群聊(2000)</span>
         </div>
         <div id="chat-box-content-message">
-            <div class="message other_message">
+            <div v-for="message in groupMessage">
+            <div class="message other_message" v-if="!(message.sender===username)">
 
                 <table style="display: inline-block">
                     <tr>
-                        <td rowspan="2" style="text-align: center;width: 70px"><img src="/resources/img/user_logo/admin.jpg" height="50px" width="50px" class="img-circle"></td>
-                        <td style="font-size: 13px;color: blue">某个人</td>
+                        <td rowspan="2" style="text-align: center;width: 70px"><img v-bind:src=`/resources/img/user_logo/${message.sender}.jpg` height="50px" width="50px" class="img-circle"></td>
+                        <td style="font-size: 13px;color: blue">{{message.sender}}</td>
                     </tr>
                     <tr>
-                        <td style="background-color: white;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">吃了啥?</td>
+                        <td style="background-color: white;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">{{message.content}}</td>
                     </tr>
                 </table>
             </div>
-            <div class="message my_message">
+            <div class="message my_message" v-if="message.sender===username">
                 <table style="display: inline-block">
                     <tr>
-                        <td style="font-size: 13px;color: blue">admin</td>
-                        <td rowspan="2" style="text-align: center;width: 70px"><img src="/resources/img/user_logo/admin.jpg" height="50px" width="50px" class="img-circle"></td>
+                        <td style="font-size: 13px;color: blue">{{username}}</td>
+                        <td rowspan="2" style="text-align: center;width: 70px"><img v-bind:src=`/resources/img/user_logo/${username}.jpg` height="50px" width="50px" class="img-circle"></td>
                     </tr>
                     <tr>
-                        <td style="background-color:deepskyblue;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">小龙虾！</td>
+                        <td style="background-color:deepskyblue;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">{{message.content}}</td>
                     </tr>
                 </table>
+            </div>
             </div>
         </div>
         <div id="chat-box-content-control">
-            <textarea style="height: 100px;width: 90%;resize: none;margin-left:5%;margin-top:25px;" class="form-control"></textarea><br>
+            <textarea style="height: 100px;width: 90%;resize: none;margin-left:5%;margin-top:25px;"
+                      class="form-control" v-model="clientData.textBoxMessage" placeholder="输入想要发送的内容吧。。。"></textarea><br>
             <div style="margin-top: 30px;position: relative;top:-30px;text-align: right">
-                <button class="btn btn-primary" id="send-btn">发送</button>
-                <button class="btn btn-danger" id="reset-btn">清空</button>
+                <button class="btn btn-primary" id="send-btn" @click="sendMessage">发送</button>
+                <button class="btn btn-danger" id="reset-btn" @click="clearMessageBox">清空</button>
             </div>
         </div>
     </div>
@@ -100,7 +103,10 @@
 <script>
   clientData={
       username:"",
-      onLineList:{}
+      onLineList:{},
+      onlineSize:0,
+      groupMessage:[],
+      textBoxMessage:""
   }
   var vm=new Vue({
       el:'#vueTemplate',
@@ -110,24 +116,37 @@
 
     var socket = io.connect('http://localhost:8888');
 
-    //连接成功时触发
-    socket.on('connect', function () {
-        // console.log(`${new Date().toLocaleString()}]:[系统]用户${username}加入聊天室。`);
-    });
+
     //初始化客户端，渲染用户名，在线列表等
     socket.on('init',function (info){
         clientData.username=info.username;
+        clientData.onlineSize=info.onlineSize;
+        clientData.groupMessage=info.groupMessage;
     });
     //说话
-    function sendMessage(msg){
-        socket.emit('sendMessage',msg);
+    function sendMessage(){
+        socket.emit('sendMessage',clientData.textBoxMessage);
+        //将内容发到服务器后清空输入框
+        clientData.textBoxMessage="";
     }
+    //清空输入框
+   function clearMessageBox(){
+        clientData.textBoxMessage="";
+   }
+   //客户端接收别人的消息
+  socket.on('updateGroupMsg',function (groupMessage){
+     clientData.groupMessage=groupMessage;
+  });
+
+
     //接受刷新列表数据
   socket.on('aMemberOn',function (nameList){
      clientData.onLineList=nameList;
+     clientData.onlineSize++;
   });
   socket.on('aMemberOff',function (nameList){
     clientData.onLineList=nameList;
+    clientData.onLineList--;
   });
 
 </script>
