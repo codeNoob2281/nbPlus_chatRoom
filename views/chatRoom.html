@@ -2,20 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/resources/css/chatRoom.css" rel="stylesheet">
+
+    <script src="/resources/js/jquery-1.12.4.min.js"></script>
+    <script src="/resources/js/jquery.rotate.js"></script>
     <script src="/resources/js/vue.min.js"></script>
-    <script src="/root/main.js"></script>
+    <script src="/resources/js/bootstrap.min.js"></script>
     <title>欢迎使用nbPlus聊天室系统</title>
+    <script>
+        var isOpen=true;
+        function toggleOnlineList(){
+            if(isOpen){
+                $('#online_list_bar_span').rotate({animateTo:90 ,duration:200});
+                isOpen=false;
+            }else{
+                $('#online_list_bar_span').rotate({animateTo:0 ,duration:200});
+                isOpen=true;
+            }
+            $('#online_list').slideToggle(200);
+        }
+    </script>
+    <style>
+    </style>
 </head>
 <body>
-<div id="diva">
-    登入成功,{{username}}<br>
-    <button @click="sendMessage('你好世界!')">发送</button>
+<div  id="vueTemplate">
+<header class="head-bar">
+    <ul class="nav nav-pills" style="float: right">
+        <li role="presentation"><a  class="head-bar-li-a" disabled="false" id="head-bar-username">欢迎你,{{username}}</a></li>
+        <li role="presentation" style="background-color: white;border-radius: 5px"><a href="#" class="head-bar-li-a">个人信息</a>
+        </li>
+        <li role="presentation"><a href="#" class="head-bar-li-a">消息</a></li>
+        <li class="dropdown">
+            <a href="#" class="head-bar-li-a" data-toggle="dropdown" role="button" aria-haspopup="true"
+               aria-expanded="false" style="margin-right: 120px">账户管理<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#">修改密码</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">退出登录</a></li>
+            </ul>
+        </li>
+    </ul>
+</header>
+
+<div id="chat-box">
+    <div id="chat-box-navbar" style="color: white">
+        <p onclick="toggleOnlineList()" id="online_list_bar">在线人数({{onLineList.length}})<span class="glyphicon glyphicon-chevron-down" id="online_list_bar_span"></span></p>
+        <ul id="online_list" >
+            <li v-for="member in onLineList"><a href="#" >{{member}}</a></li>
+        </ul>
+
+    </div>
+    <div id="chat-box-content">
+        <div id="chat-box-content-title">
+            <span>测试群聊(2000)</span>
+        </div>
+        <div id="chat-box-content-message">
+            <div class="message other_message">
+
+                <table style="display: inline-block">
+                    <tr>
+                        <td rowspan="2" style="text-align: center;width: 70px"><img src="/resources/img/user_logo/admin.jpg" height="50px" width="50px" class="img-circle"></td>
+                        <td style="font-size: 13px;color: blue">某个人</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: white;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">吃了啥?</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="message my_message">
+                <table style="display: inline-block">
+                    <tr>
+                        <td style="font-size: 13px;color: blue">admin</td>
+                        <td rowspan="2" style="text-align: center;width: 70px"><img src="/resources/img/user_logo/admin.jpg" height="50px" width="50px" class="img-circle"></td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:deepskyblue;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">小龙虾！</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="chat-box-content-control">
+            <textarea style="height: 100px;width: 90%;resize: none;margin-left:5%;margin-top:25px;" class="form-control"></textarea><br>
+            <div style="margin-top: 30px;position: relative;top:-30px;text-align: right">
+                <button class="btn btn-primary" id="send-btn">发送</button>
+                <button class="btn btn-danger" id="reset-btn">清空</button>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-
+  clientData={
+      username:"",
+      onLineList:{}
+  }
+  var vm=new Vue({
+      el:'#vueTemplate',
+      data:clientData
+  });
 
 
     var socket = io.connect('http://localhost:8888');
@@ -25,27 +115,20 @@
         // console.log(`${new Date().toLocaleString()}]:[系统]用户${username}加入聊天室。`);
     });
     //初始化客户端，渲染用户名，在线列表等
-    socket.on('init',function (msg){
-        var vm=new Vue({
-            el:'#diva',
-            data:{
-                username:msg
-            }
-        });
+    socket.on('init',function (info){
+        clientData.username=info.username;
     });
     //说话
     function sendMessage(msg){
         socket.emit('sendMessage',msg);
     }
-
-
-
-
-
-
-
-
-
+    //接受刷新列表数据
+  socket.on('aMemberOn',function (nameList){
+     clientData.onLineList=nameList;
+  });
+  socket.on('aMemberOff',function (nameList){
+    clientData.onLineList=nameList;
+  });
 
 </script>
 </body>

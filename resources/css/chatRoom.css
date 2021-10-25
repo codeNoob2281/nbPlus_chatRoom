@@ -1,0 +1,148 @@
+body {
+    background-image: url("/resources/img/body_bg.jpg");
+    background-repeat: no-repeat;
+    background-size: 2000px 100%;
+    background-position: center;
+    background-attachment: fixed;
+    text-align: center;
+}
+
+.head-bar {
+    /*margin-top: 20px;*/
+    width: 100%;
+    height: 42px;
+    background-color: #3b3b3b;
+    text-align: right;
+    /*padding-bottom: 20px;*/
+}
+
+
+.head-bar-li-a {
+    color: white;
+    background-color: #3b3b3b;
+}
+
+.head-bar-li-a:hover {
+    background-color: whitesmoke;
+    color: black;
+}
+#head-bar-username{
+    position: fixed;
+    left: 30px;
+
+}
+#head-bar-username:hover{
+    color: white;
+    background-color: #3b3b3b;
+}
+
+
+
+#chat-box {
+    user-select: none;
+    overflow-y: hidden;
+    text-align: left;
+    display: inline-block;
+    background: whitesmoke;
+    width: 95%;
+    height: 750px;
+    margin-top: 30px;
+    padding-left: 0;
+    padding-right: 0;
+    font-size: 0;
+}
+
+#chat-box-navbar {
+    vertical-align: top;
+    font-size: medium;
+    display: inline-block;
+    height: 100%;
+    width: 20%;
+    background: #3b3b3b;
+}
+
+#chat-box-content {
+    vertical-align: top;
+    font-size: medium;
+    margin-right: 0;
+    display: inline-block;
+    width: 80%;
+    position: relative;
+    height: 100%;
+}
+
+#chat-box-content-title {
+    text-align: center;
+    line-height: 30px;
+    height: 30px;
+    width: 100%;
+    border-bottom: 1px solid silver;
+}
+
+#chat-box-content-message {
+    height: 520px;
+    width: 100%;
+    overflow-y: scroll;
+
+}
+
+#chat-box-content-control {
+    border-top: 1px solid silver;
+    width: 100%;
+}
+
+#reset-btn {
+    width: 100px;
+    margin-right: 5%;
+}
+
+#send-btn {
+    width: 100px;
+}
+
+#online_list_bar {
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 30px;
+    font-weight: bold;
+}
+#online_list_bar span{
+    font-weight: normal;
+    font-size: small;
+    margin-left: 3px;
+}
+#online_list {
+    list-style: none;
+    font-size: 13px;
+
+}
+
+#online_list * {
+    color: white;
+    line-height: 30px;
+}
+
+#online_list li a:hover{
+    font-size: medium;
+    transition: font-size linear 50ms;
+    text-decoration: none;
+    color: #908f8f;
+}
+#online_list li a:link{
+    text-decoration: none;
+}
+
+.message{
+    display: block;
+    height: 80px;
+    /*width: 100px;*/
+}
+
+.my_message{
+    text-align: right;
+    /*background: #3b3b3b;*/
+}
+.other_message{
+
+    /*background: #31b0d5;*/
+}
