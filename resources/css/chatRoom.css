@@ -26,16 +26,17 @@ body {
     background-color: whitesmoke;
     color: black;
 }
-#head-bar-username{
+
+#head-bar-username {
     position: fixed;
     left: 30px;
 
 }
-#head-bar-username:hover{
+
+#head-bar-username:hover {
     color: white;
     background-color: #3b3b3b;
 }
-
 
 
 #chat-box {
@@ -106,11 +107,13 @@ body {
     margin-top: 30px;
     font-weight: bold;
 }
-#online_list_bar span{
+
+#online_list_bar span {
     font-weight: normal;
     font-size: small;
     margin-left: 3px;
 }
+
 #online_list {
     list-style: none;
     font-size: 13px;
@@ -122,27 +125,40 @@ body {
     line-height: 30px;
 }
 
-#online_list li a:hover{
+#online_list li a:hover {
     font-size: medium;
     transition: font-size linear 50ms;
     text-decoration: none;
     color: #908f8f;
 }
-#online_list li a:link{
+
+#online_list li a:link {
     text-decoration: none;
 }
 
-.message{
+.message {
     display: block;
-    height: 80px;
+    min-height: 80px;
     /*width: 100px;*/
 }
 
-.my_message{
+.my_message {
     text-align: right;
     /*background: #3b3b3b;*/
 }
-.other_message{
 
+.other_message {
     /*background: #31b0d5;*/
+}
+
+.message-content {
+    background-color: white;
+    padding: 10px 10px;
+    border-radius: 5px;
+    text-align: left;
+    font-family: '微软雅黑 Light';
+    font-size: 17px;
+    font-weight: bold;
+    max-width: 200px;
+    word-wrap: break-word;
 }

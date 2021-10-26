@@ -23,6 +23,14 @@
             }
             $('#online_list').slideToggle(200);
         }
+        //将聊天内容滚动条移到最底部
+        function scrollToBottom(){
+            //用setTimeout将其变为异步操作
+            setTimeout(function (){
+                var scrollHeight = $('#chat-box-content-message').prop("scrollHeight");
+                $('#chat-box-content-message').scrollTop(scrollHeight,200);
+            },0);
+        }
     </script>
     <style>
     </style>
@@ -65,22 +73,28 @@
 
                 <table style="display: inline-block">
                     <tr>
-                        <td rowspan="2" style="text-align: center;width: 70px"><img v-bind:src=`/resources/img/user_logo/${message.sender}.jpg` height="50px" width="50px" class="img-circle"></td>
+                        <td rowspan="2" style="text-align: center;width: 70px;position: relative">
+                            <img v-bind:src=`/resources/img/user_logo/${message.sender}.jpg` height="50px" width="50px" class="img-circle"
+                                 style="position: absolute;top:10px;left: 10px">
+                        </td>
                         <td style="font-size: 13px;color: blue">{{message.sender}}</td>
                     </tr>
                     <tr>
-                        <td style="background-color: white;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">{{message.content}}</td>
+                        <td class="message-content">{{message.content}}</td>
                     </tr>
                 </table>
             </div>
             <div class="message my_message" v-if="message.sender===username">
-                <table style="display: inline-block">
+                <table style="display: inline-block;">
                     <tr>
                         <td style="font-size: 13px;color: blue">{{username}}</td>
-                        <td rowspan="2" style="text-align: center;width: 70px"><img v-bind:src=`/resources/img/user_logo/${username}.jpg` height="50px" width="50px" class="img-circle"></td>
+                        <td rowspan="2" style="text-align: center;width: 70px;position: relative">
+                            <img v-bind:src=`/resources/img/user_logo/${username}.jpg` height="50px" width="50px" class="img-circle"
+                            style="position: absolute;top:10px;left: 10px">
+                        </td>
                     </tr>
                     <tr>
-                        <td style="background-color:deepskyblue;padding: 10px 10px;border-radius: 5px;font-family:'微软雅黑 Light';font-size:17px;font-weight: bold">{{message.content}}</td>
+                        <td class="message-content" style="background-color: deepskyblue">{{message.content}}</td>
                     </tr>
                 </table>
             </div>
@@ -102,6 +116,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   clientData={
+      serverIP:"",
       username:"",
       onLineList:{},
       onlineSize:0,
@@ -114,18 +129,23 @@
   });
 
 
-    var socket = io.connect('http://localhost:8888');
+    var socket = io.connect(`http://${clientData.serverIP}:8888`);
 
 
     //初始化客户端，渲染用户名，在线列表等
     socket.on('init',function (info){
+        clientData.serverIP=info.serverIP;
         clientData.username=info.username;
         clientData.onlineSize=info.onlineSize;
         clientData.groupMessage=info.groupMessage;
     });
     //说话
     function sendMessage(){
-        socket.emit('sendMessage',clientData.textBoxMessage);
+        //消息不为空时发送
+        if(clientData.textBoxMessage!==""){
+            socket.emit('sendMessage',clientData.textBoxMessage);
+            scrollToBottom();
+        }
         //将内容发到服务器后清空输入框
         clientData.textBoxMessage="";
     }
@@ -136,6 +156,7 @@
    //客户端接收别人的消息
   socket.on('updateGroupMsg',function (groupMessage){
      clientData.groupMessage=groupMessage;
+     scrollToBottom();
   });
 
 
@@ -146,7 +167,7 @@
   });
   socket.on('aMemberOff',function (nameList){
     clientData.onLineList=nameList;
-    clientData.onLineList--;
+    clientData.onlineSize--;
   });
 
 </script>

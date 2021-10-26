@@ -2,6 +2,7 @@ const express=require('express');
 const app=express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+var ip=require('ip');
 
 const bodyParser=require('body-parser');
 const fs=require('fs');
@@ -119,7 +120,7 @@ app.post('/register',urlencoded,function (req,res){
 
 // 启动服务器
 server.listen(8888,function (){
-   console.log('服务器已启动,地址为http://localhost:8888')
+   console.log(`服务器已启动,地址为http://${ip.address()}:8888`);
 });
 
 //服务器检测到客户端连接
@@ -143,6 +144,7 @@ io.on('connection',function (client){
         });
         // 客户端初始化
         client.emit('init', {
+            serverIP:ip.address(),//服务器ip
             username: client.name,//客户机名
             groupMessage:groupMessage,//同步群聊历史消息
             onlineSize:onlineSize//在线人数
@@ -161,6 +163,8 @@ io.on('connection',function (client){
             io.emit('updateGroupMsg',groupMessage);
         });
 });
+
+
 
 
 
