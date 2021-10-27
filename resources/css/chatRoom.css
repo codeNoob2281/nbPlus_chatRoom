@@ -149,6 +149,7 @@ body {
 
 .other_message {
     /*background: #31b0d5;*/
+    text-align: left;
 }
 
 .message-content {

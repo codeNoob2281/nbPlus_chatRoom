@@ -16,20 +16,21 @@ var onlineSize=0;
 var groupMessage=[
     {
         sender:'admin',
-        time:new Date().toLocaleString(),
-        content:"你好，世界"
+        content:"你好，世界",
+        showTime:true,
+        timeString:getTimeString(new Date()),
     },
     {
         sender:'user1',
-        time:new Date().toLocaleString(),
-        content:"世界,你好"
+        content:"世界,你好",
+        showTime:false,
+        timeString:getTimeString(new Date())
     }
 ];
 //当前用户名
 var nowUsername="";
 //登录门闸
 var isLogin=false;
-
 // -----------
 
 
@@ -110,7 +111,6 @@ app.post('/register',urlencoded,function (req,res){
         fs.writeFileSync(__dirname+'/database/account.json',JSON.stringify(userList));
         // res.writeHead(200,{'content-type':'text/html;charset=utf-8'})
         res.send("注册成功,请重新登录<br><a href='/'>点我返回登录页面</a>");
-
     }
 
 });
@@ -150,13 +150,27 @@ io.on('connection',function (client){
             onlineSize:onlineSize//在线人数
         });
 
-        // 服务器接受消息
+    //上一个时间片
+    io.lastTime=new Date();
+    io.lastTime.setSeconds(0);
+    // 服务器接受消息
         client.on('sendMessage', function (msg) {
             console.log(`[${new Date().toLocaleString()}]:[${client.name}]${msg}`);
+            //消息发送时间
+            let sendTime=new Date();
+            //该消息发送时是否需要显示时间
+            let flag=false;
+            //两消息间隔时间大于一分钟，显示时间
+            if(sendTime-io.lastTime>=60*1000) {
+                flag=true;
+                io.lastTime=sendTime;//更新上一个时间片
+                io.lastTime.setSeconds(0);
+            }
             let newMsg={
                 sender:client.name,
-                time:new Date().toLocaleString(),
-                content:msg
+                content:msg,
+                showTime:flag,
+                timeString:getTimeString(sendTime)
             }
             groupMessage.push(newMsg);
             //更新所有客户端群聊消息
@@ -165,7 +179,10 @@ io.on('connection',function (client){
 });
 
 
-
+//获取如2021/10/27 下午8:49的字符串
+function getTimeString(date){
+    return date.toLocaleString().substring(0,date.toLocaleString().indexOf(':',15));
+}
 
 
 
@@ -202,7 +219,6 @@ function getLoginHTML(failMsg,oriUsername,oriPassWord){
 </body>
 </html>
 `
-
 
 }
 

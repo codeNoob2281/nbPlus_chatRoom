@@ -68,9 +68,9 @@
             <span>测试群聊(2000)</span>
         </div>
         <div id="chat-box-content-message">
-            <div v-for="message in groupMessage">
+            <div v-for="message in groupMessage" style="text-align: center">
+                <p v-if="message.showTime" style="display: inline-block;font-size: small">{{message.timeString}}</p>
             <div class="message other_message" v-if="!(message.sender===username)">
-
                 <table style="display: inline-block">
                     <tr>
                         <td rowspan="2" style="text-align: center;width: 70px;position: relative">
@@ -115,6 +115,7 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+
   clientData={
       serverIP:"",
       username:"",
