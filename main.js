@@ -13,20 +13,21 @@ var clients={};
 var onlineNameList={};
 var onlineSize=0;
 //群聊消息队列
-var groupMessage=[
-    {
-        sender:'admin',
-        content:"你好，世界",
-        showTime:true,
-        timeString:getTimeString(new Date()),
-    },
-    {
-        sender:'user1',
-        content:"世界,你好",
-        showTime:false,
-        timeString:getTimeString(new Date())
-    }
-];
+// var groupMessage=[
+//     {
+//         sender:'admin',
+//         content:"你好，世界",
+//         showTime:true,
+//         timeString:getTimeString(new Date())
+//     },
+//     {
+//         sender:'user1',
+//         content:"世界,你好",
+//         showTime:false,
+//         timeString:getTimeString(new Date())
+//     }
+// ];
+var groupMessage=JSON.parse(fs.readFileSync(__dirname+'/database/groupMessageHistory.json').toString());
 //当前用户名
 var nowUsername="";
 //登录门闸
@@ -117,7 +118,6 @@ app.post('/register',urlencoded,function (req,res){
 
 
 
-
 // 启动服务器
 server.listen(8888,function (){
    console.log(`服务器已启动,地址为http://${ip.address()}:8888`);
@@ -149,9 +149,8 @@ io.on('connection',function (client){
             groupMessage:groupMessage,//同步群聊历史消息
             onlineSize:onlineSize//在线人数
         });
-
     //上一个时间片
-    io.lastTime=new Date();
+    io.lastTime=new Date(groupMessage[groupMessage.length-1].time) ;
     io.lastTime.setSeconds(0);
     // 服务器接受消息
         client.on('sendMessage', function (msg) {
@@ -170,9 +169,13 @@ io.on('connection',function (client){
                 sender:client.name,
                 content:msg,
                 showTime:flag,
+                time:sendTime,
                 timeString:getTimeString(sendTime)
             }
             groupMessage.push(newMsg);
+            //将更新后的消息记录写入文件
+            let str=JSON.stringify(groupMessage);
+            fs.writeFileSync(__dirname+"/database/groupMessageHistory.json",str);
             //更新所有客户端群聊消息
             io.emit('updateGroupMsg',groupMessage);
         });

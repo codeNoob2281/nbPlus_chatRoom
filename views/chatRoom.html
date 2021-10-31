@@ -29,7 +29,7 @@
             setTimeout(function (){
                 var scrollHeight = $('#chat-box-content-message').prop("scrollHeight");
                 $('#chat-box-content-message').scrollTop(scrollHeight,200);
-            },0);
+            },70);
         }
     </script>
     <style>
@@ -61,11 +61,10 @@
         <ul id="online_list" >
             <li v-for="member in onLineList"><a href="#" >{{member}}</a></li>
         </ul>
-
     </div>
     <div id="chat-box-content">
         <div id="chat-box-content-title">
-            <span>测试群聊(2000)</span>
+            <span>测试群聊({{onlineSize}})</span>
         </div>
         <div id="chat-box-content-message">
             <div v-for="message in groupMessage" style="text-align: center">
@@ -112,7 +111,6 @@
 </div>
 </div>
 
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
 
@@ -126,7 +124,11 @@
   }
   var vm=new Vue({
       el:'#vueTemplate',
-      data:clientData
+      data:clientData,
+      created:function (){
+          //客户端页面加载时使消息栏滚动条滚到底部
+          scrollToBottom();
+      }
   });
 
 

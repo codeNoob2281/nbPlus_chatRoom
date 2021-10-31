@@ -5,6 +5,7 @@ body {
     background-position: center;
     background-attachment: fixed;
     text-align: center;
+    overflow-y: hidden;
 }
 
 .head-bar {
@@ -39,6 +40,15 @@ body {
 }
 
 
+@keyframes flyIn {
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;
+    }
+}
+
 #chat-box {
     user-select: none;
     overflow-y: hidden;
@@ -51,6 +61,10 @@ body {
     padding-left: 0;
     padding-right: 0;
     font-size: 0;
+    animation-name: flyIn;
+    animation-duration: 500ms;
+    animation-timing-function: linear;
+
 }
 
 #chat-box-navbar {
@@ -153,6 +167,7 @@ body {
 }
 
 .message-content {
+    user-select: text;
     background-color: white;
     padding: 10px 10px;
     border-radius: 5px;

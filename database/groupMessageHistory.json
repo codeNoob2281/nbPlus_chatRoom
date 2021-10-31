@@ -1,0 +1,16 @@
+[
+  {
+    "sender": "admin",
+    "content": "你好,世界",
+    "showTime": true,
+    "time": "2021-10-31T12:40:05.118Z",
+    "timeString": "2021/10/31 下午8:40"
+  },
+  {
+    "sender": "user1",
+    "content": "世界,你好",
+    "showTime": false,
+    "time": "2021-10-31T12:40:23.062Z",
+    "timeString": "2021/10/31 下午8:40"
+  }
+]
