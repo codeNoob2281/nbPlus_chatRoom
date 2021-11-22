@@ -12,21 +12,6 @@ const fs=require('fs');
 var clients={};
 var onlineNameList={};
 var onlineSize=0;
-//群聊消息队列
-// var groupMessage=[
-//     {
-//         sender:'admin',
-//         content:"你好，世界",
-//         showTime:true,
-//         timeString:getTimeString(new Date())
-//     },
-//     {
-//         sender:'user1',
-//         content:"世界,你好",
-//         showTime:false,
-//         timeString:getTimeString(new Date())
-//     }
-// ];
 var groupMessage=JSON.parse(fs.readFileSync(__dirname+'/database/groupMessageHistory.json').toString());
 //当前用户名
 var nowUsername="";
@@ -39,13 +24,26 @@ var isLogin=false;
 
 const urlencoded=bodyParser.urlencoded({extends:false});
 
-var failMsg;
+
 
 app.use('/resources',express.static('resources'));
 app.use('/root',express.static(__dirname));
+app.use('/database',express.static('database'));
+app.set('view engine','ejs');
+app.set('views',__dirname+'/views');
+// 登录参数
+let loginDataEJS={
+    failMsg:"",
+    oriUsername:"",
+    oriPassWord:""
+}
+//注册参数
+let registerDataEJS={
+    failMsg:""
+}
 
 app.get('/',function (req,res){
-    res.sendFile(__dirname+'/views/login.html');
+    res.render('login',loginDataEJS);
 });
 app.get('/chatRoom',function (req,res){
     if(isLogin){
@@ -64,23 +62,26 @@ app.get('/chatRoom',function (req,res){
 
 // 处理登录请求
 app.get('/login',function (req,res){
-    res.sendFile(__dirname+'/views/login.html');
+
+    res.render('login',loginDataEJS);
 });
 app.post('/login',urlencoded,function (req,res){
     let user=req.body;
     let userList=fs.readFileSync(__dirname+'/database/account.json').toString();
     userList=JSON.parse(userList);
+    loginDataEJS.oriUsername=user.username;
+    loginDataEJS.oriPassWord=user.password;
     if(!userList[user.username]){
-      failMsg='该用户不存在，请检查用户名是否正确';
-        res.end(getLoginHTML(failMsg,user.username,user.password));
+      loginDataEJS.failMsg='该用户不存在，请检查用户名是否正确';
+        res.render('login',loginDataEJS);
     }else if(userList[user.username].password!==user.password){
-      failMsg='密码错误';
-        res.end(getLoginHTML(failMsg,user.username,user.password));
+      loginDataEJS.failMsg='密码错误';
+        res.render('login',loginDataEJS);
     }else {
         //用户在线，提示用户已在线
         if(clients[user.username]){
-            failMsg='用户已在线';
-            res.end(getLoginHTML(failMsg,user.username,user.password));
+            loginDataEJS.failMsg='用户已在线';
+            res.render('login',loginDataEJS);
         }else{
             //开登录门闸
             isLogin=true;
@@ -93,16 +94,15 @@ app.post('/login',urlencoded,function (req,res){
 
 //处理注册请求
 app.get('/register',function (req,res){
-    res.sendFile(__dirname+'/views/register.html');
+    res.render('register',registerDataEJS);
 });
 app.post('/register',urlencoded,function (req,res){
     let regUser=req.body;
     let userList=fs.readFileSync(__dirname+'/database/account.json').toString();
     userList=JSON.parse(userList);
-    let failMsg="";
     if(userList[regUser.username]){
-        failMsg="该用户已注册";
-        res.end(getRegHTML(failMsg));
+        registerDataEJS.failMsg="该用户已注册";
+        res.render('register',registerDataEJS);
     }else{
         let newUser={
             username:regUser.username,
@@ -184,79 +184,7 @@ io.on('connection',function (client){
 
 //获取如2021/10/27 下午8:49的字符串
 function getTimeString(date){
-    return date.toLocaleString().substring(0,date.toLocaleString().indexOf(':',15));
+    return date.toLocaleString().substring(0,date.toLocaleString().lastIndexOf(":"));
 }
 
-
-
-
-
-
-// 获取登录失败后的重新登录的网页
-function getLoginHTML(failMsg,oriUsername,oriPassWord){
- return `
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/resources/css/bootstrap.min.css">
-    <script src="/resources/js/jquery-1.12.4.min.js"></script>
-   <script src="/resources/js/login.js"></script>
-
-    <title>登录</title>
-</head>
-
-<body style="text-align: center;">
-<h1>nbPlus chatRoom用户登录</h1>
-<form action="/login" method="post" style="width: 700px;display: inline-block;text-align: left" onsubmit="return formValidation()">
-    <label for="username">账号:</label>
-   <input type="text" name="username" id="username" class="form-control"><br>
-    <label for="password">密码:</label>
-    <input type="password" name="password" id="password" class="form-control"><br>
-    <span id="failMsg" style="color: red">${failMsg}</span><br>
-    <input type="submit" value="登录" class="btn btn-primary">
-    <a href="/register"> <input type="button" value="没有账户?点击注册" class="btn btn-default"></a>
-</form>
-</body>
-</html>
-`
-
-}
-
-function getRegHTML(failMsg){
-    return `
- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/resources/css/bootstrap.min.css">
-    <script src="/resources/js/jquery-1.12.4.min.js"></script>
-    <script src="/resources/js/register.js"></script>
-    <title>注册</title>
-</head>
-<body style="text-align: center;">
-<h1>nbPlus chatRoom用户注册</h1>
-<form action="/register" method="post" style="width: 700px;display: inline-block;text-align: left" onsubmit="return regValidation()">
-    <label for="username">账号:</label>
-    <input type="text" name="username" id="username" class="form-control"><br>
-    <label for="password">密码:</label>
-    <input type="password" name="password" id="password" class="form-control"><br>
-    <label for="repeatPsw">确认密码:</label>
-    <input type="password" name="repeatPsw" id="repeatPsw" class="form-control"><br>
-    <span id="failMsg" style="color: red">${failMsg}</span><br>
-    <input type="submit" value="点击注册" class="btn btn-primary">
-    <a href="/login"><input type="button" value="返回登录" class="btn btn-default"></a>
-</form>
-
-</body>
-</html>
-    
-    `
-}
-
-
-
-//    <span id="failMsg" style="color: red">${failMsg}</span><br>
 

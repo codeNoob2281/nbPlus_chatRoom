@@ -40,7 +40,10 @@
 <header class="head-bar">
     <ul class="nav nav-pills" style="float: right">
         <li role="presentation"><a  class="head-bar-li-a" disabled="false" id="head-bar-username">欢迎你,{{username}}</a></li>
-        <li role="presentation" style="background-color: white;border-radius: 5px"><a href="#" class="head-bar-li-a">个人信息</a>
+        <li role="presentation" style="background-color: white;border-radius: 5px"><a href="#" class="head-bar-li-a" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">个人信息</a>
+            <ul class="dropdown-menu">
+                <li><a href="#">修改头像</a></li>
+            </ul>
         </li>
         <li role="presentation"><a href="#" class="head-bar-li-a">消息</a></li>
         <li class="dropdown">
@@ -59,7 +62,7 @@
     <div id="chat-box-navbar" style="color: white">
         <p onclick="toggleOnlineList()" id="online_list_bar">在线人数({{onlineSize}})<span class="glyphicon glyphicon-chevron-down" id="online_list_bar_span"></span></p>
         <ul id="online_list" >
-            <li v-for="member in onLineList"><a href="#" >{{member}}</a></li>
+            <li v-for="member in onLineList"><a href="#" v-bind:id="'member_'+member" @click="showMessage">{{member}}</a></li>
         </ul>
     </div>
     <div id="chat-box-content">
@@ -103,7 +106,7 @@
             <textarea style="height: 100px;width: 90%;resize: none;margin-left:5%;margin-top:25px;"
                       class="form-control" v-model="clientData.textBoxMessage" placeholder="输入想要发送的内容吧。。。"></textarea><br>
             <div style="margin-top: 30px;position: relative;top:-30px;text-align: right">
-                <button class="btn btn-primary" id="send-btn" @click="sendMessage">发送</button>
+                <button class="btn btn-primary" id="send-btn" @click="sendMessage" @keypress.enter="sendMessage" tabindex="1">发送</button>
                 <button class="btn btn-danger" id="reset-btn" @click="clearMessageBox">清空</button>
             </div>
         </div>
@@ -128,6 +131,33 @@
       created:function (){
           //客户端页面加载时使消息栏滚动条滚到底部
           scrollToBottom();
+      },
+      methods:{
+          showMessage:function (e){
+              let re=e.path[0].id;
+              re=re.substring(re.lastIndexOf('_')+1);
+              let re2=this.username;
+              if(re2>re){
+                  let t=re;
+                  re=re2;
+                  re2=t;
+              }
+              let historyFileName=`${re2}_to_${re}.json`;
+              console.log(historyFileName);
+              $(function (){
+                  $.ajax({
+                      type: "GET",//请求方式
+                      url: `/database/historyMsg/${historyFileName}`,//地址，就是json文件的请求路径
+                      dataType: "json",//数据类型可以为 text xml json  script  jsonp
+                      success: function(result){//返回的参数就是 action里面所有的有get和set方法的参数
+                          console.log(result);
+                          clientData.groupMessage=result;
+
+                      }
+                  })
+              })
+
+          }
       }
   });
 
@@ -143,7 +173,7 @@
         clientData.groupMessage=info.groupMessage;
     });
     //说话
-    function sendMessage(){
+    function sendMessage(e){
         //消息不为空时发送
         if(clientData.textBoxMessage!==""){
             socket.emit('sendMessage',clientData.textBoxMessage);
